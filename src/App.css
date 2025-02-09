@@ -1,5 +1,5 @@
 #root {
-  max-width: 1280px;
+  max-width: 80vw;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -8,7 +8,6 @@
 .logo {
   height: 6em;
   padding: 1.5em;
-  will-change: filter;
   transition: filter 300ms;
 }
 .logo:hover {
@@ -28,8 +27,14 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
+  .animated-logo {
     animation: logo-spin infinite 20s linear;
+  }
+}
+
+@media (hover: none) {
+  .animated-logo {
+    animation: none;
   }
 }
 
@@ -38,5 +43,5 @@
 }
 
 .read-the-docs {
-  color: #888;
+  color: #555;
 }

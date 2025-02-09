@@ -1,38 +1,143 @@
+import React, { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import Header from "../components/navigation/Header";
+import Sidebar from "../components/navigation/Sidebar";
+import { Button } from "../components/ui/button";
 
+// Визначаємо типи для користувача Telegram
+interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  // Додаткові властивості можна додати при потребі
+}
+
+// Визначаємо тип для небезпечних даних ініціалізації
+interface TelegramInitDataUnsafe {
+  user?: TelegramUser;
+  // Додаткові властивості можна додати при потребі
+}
+
+// Визначаємо тип для Telegram WebApp
+interface TelegramWebApp {
+  initDataUnsafe: TelegramInitDataUnsafe;
+  // Додаткові властивості можна додати при потребі
+}
+
+// Декларуємо глобальне розширення для об'єкта window
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: TelegramWebApp;
+    };
+  }
+}
+
+// Функція для отримання імені користувача з Telegram WebApp
+const getTelegramFirstName = (): string => {
+  const telegramWebApp = window.Telegram?.WebApp;
+  if (telegramWebApp?.initDataUnsafe?.user) {
+    return telegramWebApp.initDataUnsafe.user.first_name;
+  }
+  console.warn(
+    "Telegram WebApp облікові дані не знайдені. Використовуємо значення за замовчуванням.",
+  );
+  return "Гість";
+};
+
+// Компонент для привітання користувача
+const UserGreeting: React.FC<{ firstName: string }> = ({ firstName }) => {
+  console.log("📝 Rendering UserGreeting component for:", firstName);
+  return <h1 className="text-3xl font-bold">Вітаємо, {firstName}!</h1>;
+};
+
+// Компонент для відображення навігаційних посилань
+const NavigationLinks: React.FC<{
+  links: { path: string; label: string; logMessage: string }[];
+}> = ({ links }) => {
+  console.log("🔗 Rendering NavigationLinks component");
+  return (
+    <div className="mt-6 flex flex-col gap-4">
+      {links.map(({ path, label, logMessage }) => (
+        <Button asChild key={path}>
+          <Link to={path} onClick={() => console.log(logMessage)}>
+            {label}
+          </Link>
+        </Button>
+      ))}
+    </div>
+  );
+};
+
+// Основний контент для Dashboard, включаючи привітання та навігаційні посилання
+const DashboardContent: React.FC<{
+  firstName: string;
+  links: { path: string; label: string; logMessage: string }[];
+}> = ({ firstName, links }) => {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
+      <UserGreeting firstName={firstName} />
+      <p className="text-gray-500 mt-2">Виберіть розділ для перегляду</p>
+      <NavigationLinks links={links} />
+    </div>
+  );
+};
+
+// Головний компонент Dashboard
 export default function Dashboard() {
-    const { user } = useAuth();
+  console.log("📌 Rendering Dashboard component");
 
-    if (!user) {
-        console.warn("⚠️ Користувач не знайдений, використовується значення за замовчуванням");
-        return (
-            <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
-                <h1 className="text-3xl font-bold">Вітаємо, Гість!</h1>
-                <p className="text-gray-500 mt-2">Будь ласка, авторизуйтесь для доступу до системи.</p>
-            </div>
-        );
-    }
+  // Стан для імені користувача, за замовчуванням "Гість"
+  const [firstName, setFirstName] = useState("Гість");
 
-    console.log("📌 Ініціалізація Dashboard.tsx");
-    console.log("👤 Поточний користувач:", user);
+  // Отримуємо ім'я користувача після монтування компонента
+  useEffect(() => {
+    const telegramName = getTelegramFirstName();
+    setFirstName(telegramName);
+  }, []);
 
-    return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
-            <h1 className="text-3xl font-bold">Вітаємо, {user.firstName}!</h1>
-            <p className="text-gray-500 mt-2">Виберіть розділ для перегляду</p>
+  // Набір навігаційних посилань
+  const links = useMemo(
+    () => [
+      {
+        path: "/schedule",
+        label: "📅 Розклад рейсів",
+        logMessage: "📅 Перехід до Розкладу рейсів",
+      },
+      {
+        path: "/finance",
+        label: "💰 Фінанси",
+        logMessage: "💰 Перехід до Фінансів",
+      },
+      {
+        path: "/settings",
+        label: "⚙️ Налаштування",
+        logMessage: "⚙️ Перехід до Налаштувань",
+      },
+    ],
+    [],
+  );
 
-            <div className="mt-6 flex flex-col gap-4">
-                <Link to="/schedule" className="px-6 py-3 bg-blue-500 text-white rounded-lg text-lg shadow-md hover:bg-blue-600" onClick={() => console.log("📅 Перехід до Розкладу рейсів")}>
-                    📅 Розклад рейсів
-                </Link>
-                <Link to="/finance" className="px-6 py-3 bg-green-500 text-white rounded-lg text-lg shadow-md hover:bg-green-600" onClick={() => console.log("💰 Перехід до Фінансів")}>
-                    💰 Фінанси
-                </Link>
-                <Link to="/settings" className="px-6 py-3 bg-gray-500 text-white rounded-lg text-lg shadow-md hover:bg-gray-600" onClick={() => console.log("⚙️ Перехід до Налаштувань")}>
-                    ⚙️ Налаштування
-                </Link>
-            </div>
-        </div>
-    );
+  // Стан для теми
+  const [theme, setTheme] = useState("light");
+
+  // Функція для перемикання теми
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Вставляємо Header */}
+      <Header theme={theme} toggleTheme={toggleTheme} />
+      <div className="flex">
+        {/* Вставляємо Sidebar */}
+        <Sidebar />
+        <main className="p-4 flex-grow">
+          <DashboardContent firstName={firstName} links={links} />
+        </main>
+      </div>
+    </div>
+  );
 }
