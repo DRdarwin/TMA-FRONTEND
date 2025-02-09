@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Header from "../components/navigation/Header";
 import Sidebar from "../components/navigation/Sidebar";
 import { Button } from "../components/ui/button";
+import Notifications from '../components/Notifications';
 
 // Визначаємо типи для користувача Telegram
 interface TelegramUser {
@@ -10,19 +11,16 @@ interface TelegramUser {
   first_name: string;
   last_name?: string;
   username?: string;
-  // Додаткові властивості можна додати при потребі
 }
 
 // Визначаємо тип для небезпечних даних ініціалізації
 interface TelegramInitDataUnsafe {
   user?: TelegramUser;
-  // Додаткові властивості можна додати при потребі
 }
 
 // Визначаємо тип для Telegram WebApp
 interface TelegramWebApp {
   initDataUnsafe: TelegramInitDataUnsafe;
-  // Додаткові властивості можна додати при потребі
 }
 
 // Декларуємо глобальне розширення для об'єкта window
@@ -40,9 +38,7 @@ const getTelegramFirstName = (): string => {
   if (telegramWebApp?.initDataUnsafe?.user) {
     return telegramWebApp.initDataUnsafe.user.first_name;
   }
-  console.warn(
-    "Telegram WebApp облікові дані не знайдені. Використовуємо значення за замовчуванням.",
-  );
+  console.warn("Telegram WebApp облікові дані не знайдені. Використовуємо значення за замовчуванням.");
   return "Гість";
 };
 
@@ -53,9 +49,7 @@ const UserGreeting: React.FC<{ firstName: string }> = ({ firstName }) => {
 };
 
 // Компонент для відображення навігаційних посилань
-const NavigationLinks: React.FC<{
-  links: { path: string; label: string; logMessage: string }[];
-}> = ({ links }) => {
+const NavigationLinks: React.FC<{ links: { path: string; label: string; logMessage: string }[] }> = ({ links }) => {
   console.log("🔗 Rendering NavigationLinks component");
   return (
     <div className="mt-6 flex flex-col gap-4">
@@ -71,10 +65,7 @@ const NavigationLinks: React.FC<{
 };
 
 // Основний контент для Dashboard, включаючи привітання та навігаційні посилання
-const DashboardContent: React.FC<{
-  firstName: string;
-  links: { path: string; label: string; logMessage: string }[];
-}> = ({ firstName, links }) => {
+const DashboardContent: React.FC<{ firstName: string; links: { path: string; label: string; logMessage: string }[] }> = ({ firstName, links }) => {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
       <UserGreeting firstName={firstName} />
@@ -98,26 +89,11 @@ export default function Dashboard() {
   }, []);
 
   // Набір навігаційних посилань
-  const links = useMemo(
-    () => [
-      {
-        path: "/schedule",
-        label: "📅 Розклад рейсів",
-        logMessage: "📅 Перехід до Розкладу рейсів",
-      },
-      {
-        path: "/finance",
-        label: "💰 Фінанси",
-        logMessage: "💰 Перехід до Фінансів",
-      },
-      {
-        path: "/settings",
-        label: "⚙️ Налаштування",
-        logMessage: "⚙️ Перехід до Налаштувань",
-      },
-    ],
-    [],
-  );
+  const links = useMemo(() => [
+    { path: "/schedule", label: "📅 Розклад рейсів", logMessage: "📅 Перехід до Розкладу рейсів" },
+    { path: "/finance", label: "💰 Фінанси", logMessage: "💰 Перехід до Фінансів" },
+    { path: "/settings", label: "⚙️ Налаштування", logMessage: "⚙️ Перехід до Налаштувань" },
+  ], []);
 
   // Стан для теми
   const [theme, setTheme] = useState("light");
@@ -135,6 +111,7 @@ export default function Dashboard() {
         {/* Вставляємо Sidebar */}
         <Sidebar />
         <main className="p-4 flex-grow">
+          <Notifications /> {/* Блок сповіщень */}
           <DashboardContent firstName={firstName} links={links} />
         </main>
       </div>

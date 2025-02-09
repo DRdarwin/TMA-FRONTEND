@@ -8,7 +8,7 @@ export default defineConfig({
     postcss: "./postcss.config.cjs",
   },
   server: {
-    allowedHosts: ["be.specialized-air.services", "localhost", "127.0.0.1"],
+    allowedHosts: ["be.specialized-air.services","tma.specialized-air.services", "landscape.specialized-air.services", "localhost", "127.0.0.1"],
   },
   resolve: {
     alias: {
