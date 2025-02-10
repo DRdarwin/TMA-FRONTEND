@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { getNotifications } from '../api/notifications';
+import { useEffect, useState } from "react";
+import { getNotifications } from "../api/notifications";
 
 export const useNotifications = (userId: string) => {
   const [notifications, setNotifications] = useState([]);
@@ -12,7 +12,7 @@ export const useNotifications = (userId: string) => {
         const { data } = await getNotifications(userId);
         setNotifications(data.data);
       } catch (error) {
-        console.error('Помилка завантаження повідомлень:', error);
+        console.error("Помилка завантаження повідомлень:", error);
       }
     };
 

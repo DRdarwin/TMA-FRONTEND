@@ -9,7 +9,7 @@ export default function Sidebar() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="fixed top-4 left-4 z-50">
+        <Button variant="outline" className="fixed top-4 left-4 z-50 bg-opacity-30">
           ☰ Меню
         </Button>
       </SheetTrigger>
@@ -24,9 +24,6 @@ export default function Sidebar() {
           </Link>
           <Link to="/finance" className="px-4 py-2 rounded-lg hover:bg-muted">
             💰 Фінанси
-          </Link>
-          <Link to="/settings" className="px-4 py-2 rounded-lg hover:bg-muted">
-            ⚙️ Налаштування
           </Link>
         </nav>
       </SheetContent>

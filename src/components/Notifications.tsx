@@ -1,10 +1,11 @@
-import { useNotifications } from '../hooks/useNotifications';
-import { useUser } from '../hooks/useUser';
-
+import { useNotifications } from "../hooks/useNotifications";
+import { useUser } from "../hooks/useUser";
 
 const Notifications = () => {
   const { user } = useUser(); // Отримуємо інформацію про користувача
-  const notifications: { id: string; message: string }[] = useNotifications(user?.id);
+  const notifications: { id: string; message: string }[] = useNotifications(
+    user?.id,
+  );
 
   return (
     <div className="p-4 bg-white shadow-md rounded-lg">

@@ -1,9 +1,16 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Header from "../components/navigation/Header";
 import Sidebar from "../components/navigation/Sidebar";
 import { Button } from "../components/ui/button";
-import Notifications from '../components/Notifications';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import Notifications from "../components/Notifications";
+import { Sun, Moon } from "lucide-react";
+import { motion } from "framer-motion";
 
 // Визначаємо типи для користувача Telegram
 interface TelegramUser {
@@ -13,17 +20,14 @@ interface TelegramUser {
   username?: string;
 }
 
-// Визначаємо тип для небезпечних даних ініціалізації
 interface TelegramInitDataUnsafe {
   user?: TelegramUser;
 }
 
-// Визначаємо тип для Telegram WebApp
 interface TelegramWebApp {
   initDataUnsafe: TelegramInitDataUnsafe;
 }
 
-// Декларуємо глобальне розширення для об'єкта window
 declare global {
   interface Window {
     Telegram?: {
@@ -32,87 +36,96 @@ declare global {
   }
 }
 
-// Функція для отримання імені користувача з Telegram WebApp
-const getTelegramFirstName = (): string => {
-  const telegramWebApp = window.Telegram?.WebApp;
-  if (telegramWebApp?.initDataUnsafe?.user) {
-    return telegramWebApp.initDataUnsafe.user.first_name;
+const getTelegramFirstName = async (): Promise<string> => {
+  try {
+    const telegramWebApp = window.Telegram?.WebApp;
+    if (telegramWebApp?.initDataUnsafe?.user) {
+      return telegramWebApp.initDataUnsafe.user.first_name;
+    }
+    console.warn(
+      "Telegram WebApp облікові дані не знайдені. Використовується значення за замовчуванням.",
+    );
+    return "Гість";
+  } catch (error) {
+    console.error("Помилка під час отримання даних Telegram WebApp:", error);
+    return "Гість";
   }
-  console.warn("Telegram WebApp облікові дані не знайдені. Використовуємо значення за замовчуванням.");
-  return "Гість";
 };
 
-// Компонент для привітання користувача
-const UserGreeting: React.FC<{ firstName: string }> = ({ firstName }) => {
-  console.log("📝 Rendering UserGreeting component for:", firstName);
-  return <h1 className="text-3xl font-bold">Вітаємо, {firstName}!</h1>;
-};
+const links = [
+  {
+    path: "/schedule",
+    label: "📅 Розклад рейсів",
+    logMessage: "📅 Перехід до Розкладу рейсів",
+  },
+  {
+    path: "/finance",
+    label: "💰 Фінанси",
+    logMessage: "💰 Перехід до Фінансів",
+  },
+  {
+    path: "/settings",
+    label: "⚙️ Налаштування",
+    logMessage: "⚙️ Перехід до Налаштувань",
+  },
+];
 
-// Компонент для відображення навігаційних посилань
-const NavigationLinks: React.FC<{ links: { path: string; label: string; logMessage: string }[] }> = ({ links }) => {
-  console.log("🔗 Rendering NavigationLinks component");
-  return (
-    <div className="mt-6 flex flex-col gap-4">
-      {links.map(({ path, label, logMessage }) => (
-        <Button asChild key={path}>
-          <Link to={path} onClick={() => console.log(logMessage)}>
-            {label}
-          </Link>
-        </Button>
-      ))}
-    </div>
-  );
-};
-
-// Основний контент для Dashboard, включаючи привітання та навігаційні посилання
-const DashboardContent: React.FC<{ firstName: string; links: { path: string; label: string; logMessage: string }[] }> = ({ firstName, links }) => {
-  return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
-      <UserGreeting firstName={firstName} />
-      <p className="text-gray-500 mt-2">Виберіть розділ для перегляду</p>
-      <NavigationLinks links={links} />
-    </div>
-  );
-};
-
-// Головний компонент Dashboard
 export default function Dashboard() {
-  console.log("📌 Rendering Dashboard component");
-
-  // Стан для імені користувача, за замовчуванням "Гість"
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem("theme") === "dark",
+  );
   const [firstName, setFirstName] = useState("Гість");
 
-  // Отримуємо ім'я користувача після монтування компонента
   useEffect(() => {
-    const telegramName = getTelegramFirstName();
-    setFirstName(telegramName);
+    const fetchFirstName = async () => {
+      const name = await getTelegramFirstName();
+      setFirstName(name);
+    };
+    fetchFirstName();
   }, []);
 
-  // Набір навігаційних посилань
-  const links = useMemo(() => [
-    { path: "/schedule", label: "📅 Розклад рейсів", logMessage: "📅 Перехід до Розкладу рейсів" },
-    { path: "/finance", label: "💰 Фінанси", logMessage: "💰 Перехід до Фінансів" },
-    { path: "/settings", label: "⚙️ Налаштування", logMessage: "⚙️ Перехід до Налаштувань" },
-  ], []);
-
-  // Стан для теми
-  const [theme, setTheme] = useState("light");
-
-  // Функція для перемикання теми
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
+  useEffect(() => {
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Вставляємо Header */}
-      <Header theme={theme} toggleTheme={toggleTheme} />
+    <div
+      className={darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}
+    >
       <div className="flex">
-        {/* Вставляємо Sidebar */}
         <Sidebar />
         <main className="p-4 flex-grow">
-          <Notifications /> {/* Блок сповіщень */}
-          <DashboardContent firstName={firstName} links={links} />
+          <Notifications />
+          <div className="text-center">
+            <h1 className="text-3xl font-bold">Вітаємо, {firstName}!</h1>
+            <p className="text-gray-500 mt-2">Виберіть розділ для перегляду</p>
+            <Button onClick={() => setDarkMode(!darkMode)} className="mt-4">
+              {darkMode ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}{" "}
+              Змінити тему
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            {links.map(({ path, label, logMessage }) => (
+              <motion.div key={path} whileHover={{ scale: 1.05 }}>
+                <Card className="shadow-lg hover:shadow-xl transition-shadow">
+                  <CardHeader>
+                    <CardTitle>{label}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex justify-center">
+                    <Button asChild>
+                      <Link to={path} onClick={() => console.log(logMessage)}>
+                        {label}
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </main>
       </div>
     </div>

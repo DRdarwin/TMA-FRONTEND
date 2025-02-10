@@ -1,32 +1,28 @@
 // global.d.ts
-export {}; // Це необхідно, щоб файл сприймався як модуль
+export {}; // Потрібно, щоб файл бачився як модуль
 
-// Глобальний опис користувача Telegram
-interface TelegramUser {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username: string;
-  photo_url?: string;
-  auth_date: number;
-  hash: string;
+export interface TelegramUser {
+  id: string;
+  firstName: string;
+  lastName?: string;
+  username?: string;
+  photoUrl?: string;
 }
 
-// Інтерфейс для Telegram WebApp, де є потрібні методи
-interface TelegramWebApp {
-  sendData(data: string): void;
-  close(): void;
-}
-
-// Інтерфейс для Telegram, де WebApp може бути відсутнім
-interface Telegram {
-  WebApp?: TelegramWebApp;
-}
-
-// Розширення глобального об'єкта window
 declare global {
+  // Тип для Telegram WebApp (якщо ви працюєте з tg API через window.Telegram.WebApp)
+  interface TelegramWebApp {
+    sendData(data: string): void;
+    close(): void;
+    // За потреби додайте інші методи/поля (themeParams, expand(), MainButton, тощо)
+  }
+
+  // Розширюємо глобальний об’єкт window
   interface Window {
-    Telegram?: Telegram;
+    Telegram?: {
+      WebApp?: TelegramWebApp;
+    };
+    // Функція, яку викличе Telegram при успішному логіні
     handleTelegramAuth?: (user: TelegramUser) => void;
   }
 }

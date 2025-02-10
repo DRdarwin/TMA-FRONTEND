@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 // Тип для користувача
 interface User {
@@ -9,17 +9,17 @@ interface User {
 
 // Функція отримання користувача через API
 export const useUser = () => {
-  const [user, setUser] = useState<User>({ id: '', name: 'Гість' });
+  const [user, setUser] = useState<User>({ id: "", name: "Гість" });
 
   useEffect(() => {
     if (user.id) return; // Перевіряємо, чи користувач вже завантажений
-    
+
     const fetchUser = async () => {
       try {
-        const response = await axios.get('/api/user'); // Замініть на правильний API-запит
+        const response = await axios.get("/api/user"); // Замініть на правильний API-запит
         setUser(response.data);
       } catch (error) {
-        console.error('Помилка отримання користувача:', error);
+        console.error("Помилка отримання користувача:", error);
       }
     };
 
