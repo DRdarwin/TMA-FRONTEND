@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { THEME_LIGHT } from "../../config/theme";
 
@@ -19,6 +19,7 @@ const Header = memo(({ theme, toggleTheme }: HeaderProps) => {
   return (
     <header className="bg-primary text-primary-foreground p-4 flex justify-between items-center shadow-md border-b border-border">
       <div className="flex items-center gap-4">
+        {/* Кнопка "Назад" з перевіркою історії */}
         <Button
           onClick={() => navigate(-1)}
           title="Назад"
@@ -27,12 +28,19 @@ const Header = memo(({ theme, toggleTheme }: HeaderProps) => {
         >
           ←
         </Button>
-        <h1 className="text-xl font-bold tracking-wide">Pilot's Helper</h1>
+
+        {/* Логотип з посиланням на головну */}
+        <Link to="/" className="text-xl font-bold tracking-wide hover:opacity-80 transition-opacity">
+          Pilot's Helper
+        </Link>
       </div>
+
+      {/* Перемикач теми */}
       <Button
         onClick={toggleTheme}
         title="Перемкнути тему"
         aria-label="Перемкнути тему"
+        className="transition-all duration-200"
       >
         {theme === THEME_LIGHT ? "🌙 Темна тема" : "☀️ Світла тема"}
       </Button>

@@ -1,133 +1,98 @@
-import { useState, useEffect } from "react";
+// src/pages/Dashboard.tsx
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Sidebar from "../components/navigation/Sidebar";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import Notifications from "../components/Notifications";
-import { Sun, Moon } from "lucide-react";
-import { motion } from "framer-motion";
+import { Sheet, SheetTrigger, SheetContent } from "../components/ui/sheet";
 
-// Визначаємо типи для користувача Telegram
-interface TelegramUser {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-}
+// Іконки (можна замінити на Lucide)
+const MenuIcon = () => <span className="text-xl">☰</span>;
 
-interface TelegramInitDataUnsafe {
-  user?: TelegramUser;
-}
-
-interface TelegramWebApp {
-  initDataUnsafe: TelegramInitDataUnsafe;
-}
-
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: TelegramWebApp;
-    };
-  }
-}
-
-const getTelegramFirstName = async (): Promise<string> => {
-  try {
-    const telegramWebApp = window.Telegram?.WebApp;
-    if (telegramWebApp?.initDataUnsafe?.user) {
-      return telegramWebApp.initDataUnsafe.user.first_name;
-    }
-    console.warn(
-      "Telegram WebApp облікові дані не знайдені. Використовується значення за замовчуванням.",
-    );
-    return "Гість";
-  } catch (error) {
-    console.error("Помилка під час отримання даних Telegram WebApp:", error);
-    return "Гість";
-  }
-};
-
-const links = [
-  {
-    path: "/schedule",
-    label: "📅 Розклад рейсів",
-    logMessage: "📅 Перехід до Розкладу рейсів",
-  },
-  {
-    path: "/finance",
-    label: "💰 Фінанси",
-    logMessage: "💰 Перехід до Фінансів",
-  },
-  {
-    path: "/settings",
-    label: "⚙️ Налаштування",
-    logMessage: "⚙️ Перехід до Налаштувань",
-  },
-];
-
-export default function Dashboard() {
-  const [darkMode, setDarkMode] = useState(
-    () => localStorage.getItem("theme") === "dark",
-  );
-  const [firstName, setFirstName] = useState("Гість");
-
-  useEffect(() => {
-    const fetchFirstName = async () => {
-      const name = await getTelegramFirstName();
-      setFirstName(name);
-    };
-    fetchFirstName();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
+const Dashboard: React.FC = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div
-      className={darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}
-    >
-      <div className="flex">
-        <Sidebar />
-        <main className="p-4 flex-grow">
-          <Notifications />
-          <div className="text-center">
-            <h1 className="text-3xl font-bold">Вітаємо, {firstName}!</h1>
-            <p className="text-gray-500 mt-2">Виберіть розділ для перегляду</p>
-            <Button onClick={() => setDarkMode(!darkMode)} className="mt-4">
-              {darkMode ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}{" "}
-              Змінити тему
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            {links.map(({ path, label, logMessage }) => (
-              <motion.div key={path} whileHover={{ scale: 1.05 }}>
-                <Card className="shadow-lg hover:shadow-xl transition-shadow">
-                  <CardHeader>
-                    <CardTitle>{label}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex justify-center">
-                    <Button asChild>
-                      <Link to={path} onClick={() => console.log(logMessage)}>
-                        {label}
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </main>
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+      {/* Sidebar для мобільних */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            className="fixed top-4 left-4 z-50 bg-opacity-30 md:hidden"
+          >
+            <MenuIcon />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-64 p-4 bg-background shadow-lg md:static md:flex md:w-auto">
+          <h2 className="text-xl font-semibold mb-4 md:hidden">Меню</h2>
+          <nav className="flex flex-col gap-4 md:flex-row md:gap-6">
+            <Link to="/" className="px-4 py-2 rounded-lg hover:bg-muted flex items-center">
+              🏠 <span className="ml-2">Головна</span>
+            </Link>
+            <Link to="/schedule" className="px-4 py-2 rounded-lg hover:bg-muted flex items-center">
+              📅 <span className="ml-2">Розклад</span>
+            </Link>
+            <Link to="/finance" className="px-4 py-2 rounded-lg hover:bg-muted flex items-center">
+              💰 <span className="ml-2">Фінанси</span>
+            </Link>
+            <Link to="/settings" className="px-4 py-2 rounded-lg hover:bg-muted flex items-center">
+              ⚙️ <span className="ml-2">Налаштування</span>
+            </Link>
+          </nav>
+        </SheetContent>
+      </Sheet>
+
+      {/* Контентна область */}
+      <div className="flex-1 flex flex-col p-4 md:p-6">
+        {/* Заголовок */}
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6 text-center md:text-left">
+          📊 Головна панель
+        </h1>
+
+        {/* Контейнер карток, адаптивний grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <Link to="/finance" className="hover:scale-105 transition-transform">
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>💰 Фінанси</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-sm md:text-base">
+                  Перегляньте фінансові дані та історію транзакцій.
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/schedule" className="hover:scale-105 transition-transform">
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>📅 Розклад</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-sm md:text-base">
+                  Перегляньте графік польотів та завдань.
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/settings" className="hover:scale-105 transition-transform">
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>⚙️ Налаштування</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-sm md:text-base">
+                  Змініть налаштування свого акаунту та додатка.
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
