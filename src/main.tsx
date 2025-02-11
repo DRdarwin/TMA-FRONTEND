@@ -4,6 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { Buffer } from "buffer";
 
 console.log("🟢 Ініціалізація React застосунку");
 
@@ -12,7 +13,9 @@ if (!rootElement) {
   console.error("❌ Root element не знайдено, рендеринг неможливий");
   throw new Error("Root element is missing from the document");
 }
-
+if (!globalThis.Buffer) {
+  globalThis.Buffer = Buffer;
+}
 try {
   console.log("✅ Root element знайдено, рендеримо застосунок");
   ReactDOM.createRoot(rootElement).render(

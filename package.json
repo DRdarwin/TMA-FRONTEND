@@ -33,6 +33,7 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@twa-dev/sdk": "^8.0.2",
     "axios": "^1.7.9",
+    "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
