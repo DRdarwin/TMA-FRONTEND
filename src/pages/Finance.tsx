@@ -1,9 +1,20 @@
 import axios from "axios";
 import { useEffect, useState, useMemo } from "react";
-import TronWeb from "tronweb";
+import * as TronWebModule from "tronweb";
+import type { TronWeb as TronWebType } from "tronweb";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../components/ui/dialog";
+
+// Якщо ці типи потрібні лише у цьому компоненті, оголосимо їх тут:
+type TronWebOptions = {
+  fullHost: string;
+  solidityNode: string;
+  eventServer: string;
+  headers?: Record<string, string>;
+};
+
+type TronWebConstructorType = new (config: TronWebOptions) => TronWebType;
 
 export default function Finance() {
   const [balance, setBalance] = useState<number>(0);
@@ -23,10 +34,10 @@ export default function Finance() {
   const solidityNode = "https://api.trongrid.io";
   const eventServer = "https://api.trongrid.io";
 
-  // Використовуємо useMemo для ініціалізації tronWeb – він буде створений один раз
+  // Ініціалізація tronWeb через useMemo з приведенням типу
   const tronWeb = useMemo(() => {
-    // Перевіряємо, чи TronWeb має властивість default (ESM export)
-    const TronWebConstructor = ((TronWeb as any).default) || TronWeb;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const TronWebConstructor = (((TronWebModule as any).default || TronWebModule) as unknown) as TronWebConstructorType;
     return new TronWebConstructor({
       fullHost: fullNode,
       solidityNode: solidityNode,
@@ -37,28 +48,31 @@ export default function Finance() {
     });
   }, [fullNode, solidityNode, eventServer]);
 
-  // Використовуємо useMemo для usdtAbi, щоб масив не створювався знову при кожному рендері
-  const usdtAbi = useMemo(() => ([
-    {
-      constant: true,
-      inputs: [{ name: "_owner", type: "address" }],
-      name: "balanceOf",
-      outputs: [{ name: "balance", type: "uint256" }],
-      type: "function",
-    },
-    {
-      constant: false,
-      inputs: [
-        { name: "_to", type: "address" },
-        { name: "_value", type: "uint256" },
-      ],
-      name: "transfer",
-      outputs: [{ name: "success", type: "bool" }],
-      type: "function",
-    },
-  ]), []);
+  // usdtAbi не змінюється – оголошуємо через useMemo
+  const usdtAbi = useMemo(
+    () => [
+      {
+        constant: true,
+        inputs: [{ name: "_owner", type: "address" }],
+        name: "balanceOf",
+        outputs: [{ name: "balance", type: "uint256" }],
+        type: "function",
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_to", type: "address" },
+          { name: "_value", type: "uint256" },
+        ],
+        name: "transfer",
+        outputs: [{ name: "success", type: "bool" }],
+        type: "function",
+      },
+    ],
+    []
+  );
 
-  // Адреса контракту USDT TRC20 (можна брати з env)
+  // Адреса контракту USDT TRC20
   const usdtContractAddress =
     process.env.REACT_APP_USDT_CONTRACT_ADDRESS || "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj";
 
@@ -66,19 +80,12 @@ export default function Finance() {
     async function fetchData() {
       try {
         setLoading(true);
-        // Адреса гаманця – для демо беремо з env (у реальному додатку інтегруємо вбудований гаманець)
         const account = process.env.REACT_APP_WALLET_ADDRESS || "";
-        // Створюємо інстанс контракту
         const usdtContract = await tronWeb.contract(usdtAbi, usdtContractAddress);
-        // Викликаємо метод balanceOf
         const userBalanceRaw: string = await usdtContract.balanceOf(account).call();
-        // USDT TRC20 має 6 десяткових, тому ділимо результат на 1e6
         setBalance(parseFloat(userBalanceRaw) / 1e6);
 
-        // Отримання історії платежів із API
-        const response = await axios.get(
-          `${process.env.REACT_APP_PAYMENT_HISTORY_API}`
-        );
+        const response = await axios.get(`${process.env.REACT_APP_PAYMENT_HISTORY_API}`);
         if (response.data && Array.isArray(response.data)) {
           setPaymentHistory(response.data);
         } else {
@@ -93,7 +100,6 @@ export default function Finance() {
     fetchData();
   }, [tronWeb, usdtAbi, usdtContractAddress]);
 
-  // Функція для підтвердження переказу
   const confirmTransfer = async () => {
     if (!recipient || transferAmount <= 0) {
       setTransferStatus("Будь ласка, введіть коректні дані");
@@ -102,7 +108,6 @@ export default function Finance() {
     setTransferStatus("Відправлення транзакції...");
     try {
       const usdtContract = await tronWeb.contract(usdtAbi, usdtContractAddress);
-      // Конвертуємо суму в "sun" (1 USDT = 1e6 sun)
       const amountInSun = transferAmount * 1e6;
       const result = await usdtContract.transfer(recipient, amountInSun).send({
         feeLimit: 100000000,
@@ -120,12 +125,8 @@ export default function Finance() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">💰 Фінанси</h1>
-
-      {/* Кнопка відкриття модального вікна для переказу */}
       <Button onClick={() => setModalOpen(true)}>Переказати USDT</Button>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Баланс */}
         <Card>
           <CardHeader>
             <CardTitle>💵 Баланс</CardTitle>
@@ -138,8 +139,6 @@ export default function Finance() {
             )}
           </CardContent>
         </Card>
-
-        {/* Історія платежів */}
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>📜 Історія виплат</CardTitle>
@@ -154,9 +153,7 @@ export default function Finance() {
                 {paymentHistory.map((payment, index) => (
                   <li key={index} className="py-2 flex justify-between">
                     <span className="text-gray-600">{payment.date}</span>
-                    <span className="text-gray-800 font-semibold">
-                      {payment.amount} USDT
-                    </span>
+                    <span className="text-gray-800 font-semibold">{payment.amount} USDT</span>
                     <span className="text-blue-500">{payment.flight}</span>
                   </li>
                 ))}
@@ -164,8 +161,6 @@ export default function Finance() {
             )}
           </CardContent>
         </Card>
-
-        {/* Блок для переказу */}
         <Card>
           <CardHeader>
             <CardTitle>🔄 Переказ коштів</CardTitle>
@@ -177,8 +172,6 @@ export default function Finance() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Модальне вікно для підтвердження переказу */}
       <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -206,9 +199,7 @@ export default function Finance() {
               />
             </label>
           </div>
-          {transferStatus && (
-            <p className="mt-2 text-sm text-gray-600">{transferStatus}</p>
-          )}
+          {transferStatus && <p className="mt-2 text-sm text-gray-600">{transferStatus}</p>}
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalOpen(false)}>
               Скасувати

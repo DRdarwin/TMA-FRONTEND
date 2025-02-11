@@ -75,7 +75,7 @@ export default function Schedule() {
     const fetchFlights = async () => {
       dispatch({ type: "FETCH_START" });
       try {
-        const response = await api.get<Flight[]>("/flights", { signal });
+        const response = await api.get<Flight[]>("/api/flights", { signal });
         console.log(
           "✈️ Отримані рейси:",
           Array.isArray(response.data),
