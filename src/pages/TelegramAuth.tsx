@@ -3,8 +3,8 @@ import { TelegramUser } from "../global";
 
 // Пропси вашого компонента
 interface TelegramAuthProps {
-  onAuthSuccess: (user: TelegramUser) => void; 
-  // TelegramUser уже оголошений глобально, 
+  onAuthSuccess: (user: TelegramUser) => void;
+  // TelegramUser уже оголошений глобально,
   // тож ми його тут можемо просто використовувати
 }
 
@@ -21,7 +21,7 @@ const TelegramAuth: React.FC<TelegramAuthProps> = ({ onAuthSuccess }) => {
 
     // Перевіряємо, чи не завантажений скрипт раніше
     const existingScript = document.querySelector(
-      "script[src='https://telegram.org/js/telegram-widget.js?22']"
+      "script[src='https://telegram.org/js/telegram-widget.js?22']",
     );
 
     // Якщо кнопка Telegram ще не вставлялася — додаємо <script>
@@ -64,16 +64,17 @@ const TelegramAuth: React.FC<TelegramAuthProps> = ({ onAuthSuccess }) => {
       }
     };
 
-    // Очищення: якщо ваш компонентUnmount вимагає зняття handleTelegramAuth, 
-    // можете додати return () => { window.handleTelegramAuth = undefined; }  
+    // Очищення: якщо ваш компонентUnmount вимагає зняття handleTelegramAuth,
+    // можете додати return () => { window.handleTelegramAuth = undefined; }
     // Але це не завжди потрібно.
-
   }, [onAuthSuccess, redirectURL]);
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <div>
-        <h2 className="text-xl font-semibold mb-4">Авторизація через Telegram</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          Авторизація через Telegram
+        </h2>
         {/* Елемент, куди Telegram вставить кнопку */}
         <div id="telegram-login"></div>
       </div>

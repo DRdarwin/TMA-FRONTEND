@@ -48,7 +48,10 @@ function App() {
       </Route>
 
       {/* TelegramAuth без Sidebar */}
-      <Route path="/auth" element={<TelegramAuth onAuthSuccess={handleAuthSuccess} />} />
+      <Route
+        path="/auth"
+        element={<TelegramAuth onAuthSuccess={handleAuthSuccess} />}
+      />
     </Routes>
   );
 }

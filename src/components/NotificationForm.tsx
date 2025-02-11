@@ -22,7 +22,7 @@ const NotificationForm: React.FC = () => {
         {
           userId,
           message,
-        }
+        },
       );
 
       setResponseMessage(response.data.message || "Сповіщення надіслано!");

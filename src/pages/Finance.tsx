@@ -2,8 +2,19 @@ import axios from "axios";
 import { useEffect, useState, useMemo } from "react";
 import TronWeb from "tronweb";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../components/ui/dialog";
 
 export default function Finance() {
   const [balance, setBalance] = useState<number>(0);
@@ -24,41 +35,45 @@ export default function Finance() {
   const eventServer = "https://api.trongrid.io";
 
   // Використовуємо useMemo для ініціалізації tronWeb – він буде створений один раз
- const tronWeb = useMemo(() => {
-  const TronWebAny = TronWeb as typeof TronWeb;
-  return new TronWebAny({
-    fullHost: fullNode,
-    solidityNode: solidityNode,
-    eventServer: eventServer,
-    headers: {
-      "TRON-PRO-API-KEY": "faa10796-545f-4985-84dd-f245cf2e9b7b",
-    },
-  });
-}, [fullNode, solidityNode, eventServer]);
+  const tronWeb = useMemo(() => {
+    const TronWebAny = TronWeb as typeof TronWeb;
+    return new TronWebAny({
+      fullHost: fullNode,
+      solidityNode: solidityNode,
+      eventServer: eventServer,
+      headers: {
+        "TRON-PRO-API-KEY": "faa10796-545f-4985-84dd-f245cf2e9b7b",
+      },
+    });
+  }, [fullNode, solidityNode, eventServer]);
   // Використовуємо useMemo для usdtAbi, щоб масив не створювався знову при кожному рендері
-  const usdtAbi = useMemo(() => ([
-    {
-      constant: true,
-      inputs: [{ name: "_owner", type: "address" }],
-      name: "balanceOf",
-      outputs: [{ name: "balance", type: "uint256" }],
-      type: "function",
-    },
-    {
-      constant: false,
-      inputs: [
-        { name: "_to", type: "address" },
-        { name: "_value", type: "uint256" },
-      ],
-      name: "transfer",
-      outputs: [{ name: "success", type: "bool" }],
-      type: "function",
-    },
-  ]), []);
+  const usdtAbi = useMemo(
+    () => [
+      {
+        constant: true,
+        inputs: [{ name: "_owner", type: "address" }],
+        name: "balanceOf",
+        outputs: [{ name: "balance", type: "uint256" }],
+        type: "function",
+      },
+      {
+        constant: false,
+        inputs: [
+          { name: "_to", type: "address" },
+          { name: "_value", type: "uint256" },
+        ],
+        name: "transfer",
+        outputs: [{ name: "success", type: "bool" }],
+        type: "function",
+      },
+    ],
+    [],
+  );
 
   // Адреса контракту USDT TRC20 (можна брати з env)
   const usdtContractAddress =
-    process.env.REACT_APP_USDT_CONTRACT_ADDRESS || "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj";
+    process.env.REACT_APP_USDT_CONTRACT_ADDRESS ||
+    "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj";
 
   useEffect(() => {
     async function fetchData() {
@@ -67,20 +82,28 @@ export default function Finance() {
         // Адреса гаманця – для демо беремо з env (у реальному додатку інтегруємо вбудований гаманець)
         const account = process.env.REACT_APP_WALLET_ADDRESS || "";
         // Створюємо інстанс контракту
-        const usdtContract = await tronWeb.contract(usdtAbi, usdtContractAddress);
+        const usdtContract = await tronWeb.contract(
+          usdtAbi,
+          usdtContractAddress,
+        );
         // Викликаємо метод balanceOf
-        const userBalanceRaw: string = await usdtContract.balanceOf(account).call();
+        const userBalanceRaw: string = await usdtContract
+          .balanceOf(account)
+          .call();
         // USDT TRC20 має 6 десяткових, тому ділимо результат на 1e6
         setBalance(parseFloat(userBalanceRaw) / 1e6);
 
         // Отримання історії платежів із API
         const response = await axios.get(
-          `${process.env.REACT_APP_PAYMENT_HISTORY_API}`
+          `${process.env.REACT_APP_PAYMENT_HISTORY_API}`,
         );
         if (response.data && Array.isArray(response.data)) {
           setPaymentHistory(response.data);
         } else {
-          console.error("Недійсний формат даних для історії виплат:", response.data);
+          console.error(
+            "Недійсний формат даних для історії виплат:",
+            response.data,
+          );
         }
       } catch (error) {
         console.error("Помилка отримання фінансових даних:", error);

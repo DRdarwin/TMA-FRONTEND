@@ -10,7 +10,12 @@ import {
   TableHead,
   TableCell,
 } from "../components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 
 console.log("📜 Schedule component loaded");
 
@@ -71,7 +76,11 @@ export default function Schedule() {
       dispatch({ type: "FETCH_START" });
       try {
         const response = await api.get<Flight[]>("/flights", { signal });
-        console.log("✈️ Отримані рейси:", Array.isArray(response.data), response.data);
+        console.log(
+          "✈️ Отримані рейси:",
+          Array.isArray(response.data),
+          response.data,
+        );
         dispatch({ type: "FETCH_SUCCESS", payload: response.data });
       } catch (err) {
         if (signal.aborted) return;
@@ -94,7 +103,9 @@ export default function Schedule() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Заголовок */}
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">📅 Розклад рейсів</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+        📅 Розклад рейсів
+      </h1>
 
       {/* Головний контейнер */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

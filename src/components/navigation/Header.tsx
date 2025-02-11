@@ -30,7 +30,10 @@ const Header = memo(({ theme, toggleTheme }: HeaderProps) => {
         </Button>
 
         {/* Логотип з посиланням на головну */}
-        <Link to="/" className="text-xl font-bold tracking-wide hover:opacity-80 transition-opacity">
+        <Link
+          to="/"
+          className="text-xl font-bold tracking-wide hover:opacity-80 transition-opacity"
+        >
           Pilot's Helper
         </Link>
       </div>

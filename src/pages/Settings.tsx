@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 
 const THEME_LIGHT = "light";
 const THEME_DARK = "dark";
@@ -8,28 +13,39 @@ const LANGUAGES = ["Українська", "English", "Русский"];
 
 export default function Settings() {
   const [language, setLanguage] = useState("Українська");
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || THEME_LIGHT);
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("theme") || THEME_LIGHT,
+  );
 
   useEffect(() => {
     document.documentElement.className = theme;
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleLanguageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     console.log("Language change triggered: ", event.target.value);
     setLanguage(event.target.value);
   };
 
   const toggleTheme = () => {
     console.log("Theme toggle triggered. Current theme: ", theme);
-    setTheme((prevTheme) => (prevTheme === THEME_LIGHT ? THEME_DARK : THEME_LIGHT));
+    setTheme((prevTheme) =>
+      prevTheme === THEME_LIGHT ? THEME_DARK : THEME_LIGHT,
+    );
   };
 
   const handleProfileSettings = () => {
     console.log("Navigating to profile settings...");
   };
 
-  console.log("Rendering Settings component with language:", language, "and theme:", theme);
+  console.log(
+    "Rendering Settings component with language:",
+    language,
+    "and theme:",
+    theme,
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
