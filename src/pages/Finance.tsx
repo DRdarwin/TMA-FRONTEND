@@ -27,7 +27,7 @@ export default function Finance() {
         setBalance(responseBalance.data.balance);
         // Запит до бекенду для отримання історії транзакцій
         const responseTransactions = await axios.get(`/api/finance/transactions`, { params: { userId: "12345" } });
-        setPaymentHistory(responseTransactions.data.transactions);
+        setPaymentHistory(responseTransactions.data.transactions || []);
       } catch (error) {
         console.error("Помилка отримання фінансових даних:", error);
       } finally {
