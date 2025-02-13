@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import { cn } from "../../lib/utils";
 import { cva, type VariantProps } from "class-variance-authority"
 import React from "react"

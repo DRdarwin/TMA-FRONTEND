@@ -1,24 +1,21 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from 'react';
-import { fetchRoutes, deleteRoute } from '../api/routes';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { useEffect, useState } from "react";
+import { fetchRoutes, deleteRoute } from "../api/routes";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '400px'
-};
+// Визначення інтерфейсів
+interface Waypoint {
+  latitude: number;
+  longitude: number;
+}
 
-const center = {
-  lat: 48.3794,
-  lng: 31.1656
-};
-
-type Route = {
-  id: string;
+interface Route {
+  id: number; // ОНОВЛЕНО: `id` тепер має тип `number`
   name: string;
-  description?: string;
-  waypoints: { latitude: number; longitude: number }[];
-};
+  waypoints?: Waypoint[];
+}
+
+const mapContainerStyle = { width: "100%", height: "400px" };
+const center = { lat: 48.3794, lng: 31.1656 };
 
 const Routes = () => {
   const [routes, setRoutes] = useState<Route[]>([]);
@@ -28,10 +25,10 @@ const Routes = () => {
   useEffect(() => {
     const loadRoutes = async () => {
       try {
-        const data = await fetchRoutes();
-        setRoutes(data);
+        const data: Route[] = await fetchRoutes();
+        setRoutes(Array.isArray(data) ? data : []);
       } catch {
-        setError('Помилка завантаження маршрутів');
+        setError("Помилка завантаження маршрутів");
       } finally {
         setLoading(false);
       }
@@ -39,12 +36,12 @@ const Routes = () => {
     loadRoutes();
   }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       await deleteRoute(id);
-      setRoutes(routes.filter(route => route.id !== id));
-    } catch (err) {
-      alert('Не вдалося видалити маршрут');
+      setRoutes((prevRoutes) => prevRoutes.filter((route) => route.id !== id));
+    } catch {
+      alert("Не вдалося видалити маршрут");
     }
   };
 
@@ -54,23 +51,20 @@ const Routes = () => {
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Маршрути</h1>
-      <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
+      <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""}>
         <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={6}>
-          {routes.map(route => (
-            route.waypoints?.map((point, index) => (
+          {routes.map((route) =>
+            route.waypoints?.map((point: Waypoint, index: number) => (
               <Marker key={`${route.id}-${index}`} position={{ lat: point.latitude, lng: point.longitude }} />
             ))
-          ))}
+          )}
         </GoogleMap>
       </LoadScript>
       <ul>
-        {routes.map(route => (
+        {routes.map((route) => (
           <li key={route.id} className="flex justify-between items-center p-2 border-b">
             <span>{route.name}</span>
-            <button 
-              className="bg-red-500 text-white px-3 py-1 rounded" 
-              onClick={() => handleDelete(route.id)}
-            >
+            <button className="bg-red-500 text-white px-3 py-1 rounded" onClick={() => handleDelete(route.id)}>
               Видалити
             </button>
           </li>

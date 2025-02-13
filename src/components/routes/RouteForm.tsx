@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from 'react';
 import { createRoute } from '../../api/routes';
 
@@ -24,7 +23,7 @@ const RouteForm: React.FC<{ onRouteAdded: (route: { id: string; name: string; de
       setName('');
       setDescription('');
       setWaypoints([]);
-    } catch (error) {
+    } catch {
       alert('Не вдалося створити маршрут');
     }
   };

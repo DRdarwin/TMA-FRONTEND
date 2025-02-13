@@ -41,6 +41,12 @@ export default function Sidebar() {
             💰 <span className="ml-2">Фінанси</span>
           </Link>
           <Link
+            to="/routes"
+            className="px-4 py-2 rounded-lg hover:bg-muted flex items-center"
+          >
+            🛤️ <span className="ml-2">Маршрути</span>
+          </Link>
+          <Link
             to="/settings"
             className="px-4 py-2 rounded-lg hover:bg-muted flex items-center"
           >
